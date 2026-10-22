@@ -17,6 +17,7 @@ app.get("/:code", async function (req, res) {
   if (!url) {
     return res.status(404).json({ error: "URl not found" });
   }
+
   res.redirect(302, url.originalUrl);
 
   await urlModel.findOneAndUpdate(
