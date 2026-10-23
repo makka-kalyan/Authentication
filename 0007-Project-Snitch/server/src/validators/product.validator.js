@@ -76,3 +76,47 @@ export const createProductValidator = [
     next();
   },
 ];
+
+export const unlistProductValidator = [
+  param("id")
+    .exists()
+    .withMessage("product id is required in req params")
+    .bail()
+    .isMongoId()
+    .withMessage("product is must be a valid mongo object id"),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: "invalid Data",
+        errors: errors.array(),
+      });
+    }
+
+    next();
+  },
+];
+
+export const listProductValidator = [
+  param("id")
+    .exists()
+    .withMessage("product id is required in req params")
+    .bail()
+    .isMongoId()
+    .withMessage("product is must be a valid mongo object id"),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: "invalid Data",
+        errors: errors.array(),
+      });
+    }
+
+    next();
+  },
+];
