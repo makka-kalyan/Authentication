@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: String,
+    required: true,
   },
   passwordHash: {
     type: String,
@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
     enum: ["user", "seller"],
+  },
+  refreshToken: {
+    type: String,
   },
 });
 
