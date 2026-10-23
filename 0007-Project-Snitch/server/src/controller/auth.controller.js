@@ -138,7 +138,7 @@ export async function refresh(req, res) {
 
   if (!refreshToken) {
     return res.status(401).json({
-      message: "Refresh tokrn is required.",
+      message: "Refresh tokenn is required.",
     });
   }
 
