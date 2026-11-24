@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Razorpay Payment</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  </head>
+
+  <body>
+    <h1>Razorpay Payment</h1>
+    <button id="pay-button">Pay Now</button>
+
+    <script>
+      async function payNow() {
+        try {
+          // Step 1: Create order from backend
+          const response = await fetch(
+            "http://localhost:3000/api/payments/6b0552599544e4039bee5a05/order",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "Order creation failed");
+          }
+
+          console.log("Backend Response:", data);
+
+          // Step 2: Configure Razorpay Checkout
+          const options = {
+            key: data.keyId,
+            order_id: data.orderId,
+            amount: data.amount,
+            currency: data.currency,
+            name: "Kapda Co.",
+            description: "Canvas Tote Bag",
+
+            // Step 3: Verify payment on backend
+            handler: async function (paymentResponse) {
+              try {
+                console.log("Payment response:", paymentResponse);
+
+                const verifyResponse = await fetch(
+                  "http://localhost:3000/api/payments/verify",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      orderId: paymentResponse.razorpay_order_id,
+                      paymentId: paymentResponse.razorpay_payment_id,
+                      signature: paymentResponse.razorpay_signature,
+                    }),
+                  },
+                );
+
+                const verifyData = await verifyResponse.json();
+
+                if (!verifyResponse.ok) {
+                  throw new Error(
+                    verifyData.message || "Payment verification failed",
+                  );
+                }
+
+                if (verifyData.status === "success") {
+                  alert("Payment successful and verified!");
+                  console.log("Verification response:", verifyData);
+                } else {
+                  alert("Payment verification unsuccessful");
+                }
+              } catch (error) {
+                console.error("Verification Error:", error);
+                alert(error.message);
+              }
+            },
+
+            theme: {
+              color: "#3399cc",
+            },
+          };
+
+          // Step 4: Open Razorpay Checkout
+          const rzp = new window.Razorpay(options);
+
+          rzp.on("payment.failed", function (response) {
+            console.error("Payment failed:", response.error);
+            alert(response.error.description);
+          });
+
+          rzp.open();
+        } catch (error) {
+          console.error("Payment Error:", error);
+          alert(error.message);
+        }
+      }
+
+      document.getElementById("pay-button").addEventListener("click", payNow);
+    </script>
+  </body>
+</html>
